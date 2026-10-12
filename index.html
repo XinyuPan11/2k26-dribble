@@ -65,6 +65,14 @@
   .steps li.ok{background:#12291f} .steps li.ok::before{content:'✓';background:#38d39f;color:#111}
   .steps li.bad{background:#2c1418;outline:1px solid var(--turbo)} .steps li.bad::before{content:'✕';background:var(--turbo)}
   .ctrls{display:flex;gap:10px;flex-wrap:wrap}
+  .vids{margin:14px 0 6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#12151b}
+  .vh{margin-bottom:8px} .vh .mut{font-size:13px;margin-left:6px}
+  .vlist{display:flex;gap:8px;flex-wrap:wrap}
+  .vcard{display:flex;gap:8px;align-items:center;background:#1c2029;border:1px solid var(--line);border-radius:8px;padding:5px 10px 5px 5px;color:var(--fg);cursor:pointer;font:inherit;font-size:13px;text-align:left}
+  .vcard img{width:96px;height:54px;object-fit:cover;border-radius:5px}
+  .vcard.on{border-color:var(--acc);background:#2a2216}
+  #vidBox iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;margin-top:10px;background:#000}
+  .vctl{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:14px}
   .b2{background:#262b35;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}
   a{color:var(--ls)}
 </style>
@@ -146,6 +154,7 @@
     <button class="b2" id="bNext">下一步 ▶</button>
     <label class="mut" style="font-size:13px"><input type="checkbox" id="cLoop" checked> 循环</label>
   </div>
+  <div class="vids" id="vids"></div>
   <ol class="steps" id="steps"></ol>
   <div class="why" id="why"></div>
 </div>
@@ -167,7 +176,8 @@
   <a href="https://nba.2k.com/2k26/courtside-report/gameplay/" target="_blank">2K26 Gameplay Courtside Report</a> ·
   <a href="https://www.nba2klab.com/videos/nba-2k26-dribble-moves-breakdown" target="_blank">NBA2KLab 2K26 运球手部视角教学</a> ·
   <a href="https://www.magicgameworld.com/?p=128291" target="_blank">MagicGameWorld 运球指南</a> ·
-  <a href="https://www.operationsports.com/the-ultimate-dribble-tutorial-for-nba-2k26/" target="_blank">Operation Sports 2K26 运球教程</a>（标「社区技巧」的连招来源）
+  <a href="https://www.operationsports.com/the-ultimate-dribble-tutorial-for-nba-2k26/" target="_blank">Operation Sports 2K26 运球教程</a>（标「社区技巧」的连招来源）<br>
+  🎬 视频片段（按 YouTube 章节和字幕时间戳定位）：NBA2KLab、Kevin Cruz、Nayeem4K、J R Way2Cold、YOUNG DIRK、ThatGuyLonely、Daiko、PAC Hoops
 </div>
 </div>
 
@@ -298,11 +308,12 @@ const COMBOS=[
    {txt:'右摇杆 从持球手侧开始画圈（只画到下方）= 转身起手',seq:[{rs:'B',ms:130,m:'画圈起点'},{rs:'DB',ms:130,m:'画圈'},{rs:'D',ms:150,m:'画到这'},{ms:120}]},
    {gap:450,txt:'转身中：按住 RT + 左摇杆 往下拨 = 取消转身',seq:[{t:1,ls:'D',ms:350,lm:'往下拨'},{t:1,ms:200}]},
    {txt:'按住 RT + 左摇杆 往持球手侧斜上爆发',seq:[{t:1,ls:'UB',ms:1100,lm:'推住冲'}]}]},
- {name:'穿裆 Nutmeg',tag:'社区技巧 · 细节待验证',
-  why:'来自 Operation Sports：贴近防守人时，右摇杆先往斜下、再迅速横拨，把球从防守人两腿之间穿过去。各站对具体斜下方向说法不一，这里按“非持球手侧斜下 → 非持球手侧横拨”演示，进游戏请先自己试两个方向。',
+ {name:'穿裆 Nutmeg',tag:'手部视角教学确认',
+  why:'按 J R Way2Cold 的 2K26 手部视角教学：向前跑、全程按住加速；先往非持球手侧斜下拨（背后起手），紧接着立刻往非持球手侧横拨，球从防守人两腿之间穿过去。两下是分开的两次拨动，第二下要非常快。',
   phases:[
-   {txt:'贴近防守人：右摇杆 往非持球手侧斜下，然后迅速滑到横向（一笔画完）',seq:[{rs:'DO',ms:200,m:'斜下'},{rs:'O',ms:200,m:'快速横拨'},{ms:150}]},
-   {gap:600,txt:'按住 RT + 左摇杆 向前冲去接球',seq:[{t:1,ls:'U',ms:1100,lm:'推住冲'}]}]},
+   {txt:'按住 RT + 左摇杆 向前跑（全程按住加速）',seq:[{t:1,ls:'U',ms:700,lm:'推住'}]},
+   {txt:'不松 RT：右摇杆 往非持球手侧斜下轻拨（背后起手）',seq:[{t:1,ls:'U',lm:'保持',rs:'DO',ms:220,m:'轻拨'},{t:1,ls:'U',lm:'保持',ms:80}]},
+   {gap:300,txt:'立刻：右摇杆 往非持球手侧横拨 = 穿裆',seq:[{t:1,ls:'U',lm:'保持',rs:'O',ms:220,m:'立刻横拨'},{t:1,ls:'U',lm:'保持',ms:300}]}]},
  {name:'按住加速 连续逃脱',tag:'社区技巧 · Chained Escapes',
   why:'来自 Operation Sports：一直按住加速，右摇杆连续拨，就能把多个逃脱动作接起来。先往持球手侧拨 = 逃脱迟疑，再往非持球手侧斜上拨 = 逃脱交叉，最后爆发。手指全程不松 R2/RT。',
   phases:[
@@ -421,6 +432,7 @@ function selectCombo(i){
   document.getElementById('tl').innerHTML=c.phases.map((p,j)=>`<div style="flex:${phaseEnd[j]-phaseStart[j]}"><i></i></div>`).join('');
   document.querySelectorAll('#tl div').forEach((d,j)=>d.onclick=()=>playPhase(j));
   tau=0; trails={ls:[],rs:[]}; stopAt=null; loopWait=0; playing=true;
+  renderVids();
   if(mode==='practice'){ playing=false; document.querySelectorAll('#steps li').forEach(li=>li.onclick=null); PS.stats={tries:0,ok:0,streak:0,best:0}; pReset(); setMsg('',''); }
 }
 
@@ -619,6 +631,57 @@ function setMode(m){ mode=m; const pr=m==='practice';
   PS.trails={ls:[],rs:[]}; PS.connId=undefined;
   if(pr){ playing=false; pReset(); setMsg('',''); } else selectCombo(cur); }
 window.addEventListener('gamepadconnected',()=>{PS.connId=undefined;});
+
+
+// ====== 真实游戏画面：YouTube 片段（按章节/字幕时间戳定位，点击才加载） ======
+const V=(id,s,e,label,by)=>({id,s,e,label,by});
+const LAB='NBA2KLab', KC='Kevin Cruz', OGS='oiGq39Mbo8k';
+const VIDS={
+ '节奏试探 → 迟疑 → 爆发':{q:'size up hesitation burst',v:[V('hsIHVQutVsE',17,64,'Size-up 操作',LAB),V('ocyhMviieFQ',16,49,'爆发与变速（手部视角）',LAB),V('hsIHVQutVsE',243,300,'迟疑',LAB)]},
+ '动量交叉 Momentum Cross':{q:'momentum crossover',v:[V('ocyhMviieFQ',49,60,'动量交叉（手部视角）',LAB),V('a-sjmgpJYEw',33,75,'动量交叉（手部视角）','Daiko'),V('WIYU3HHUu0k',817,853,'动量交叉 + 接背后',KC)]},
+ '二段误导 Misdirection':{q:'misdirection dribble',v:[V('ocyhMviieFQ',60,89,'误导（手部视角）',LAB),V('NCCLRDnGCek',84,150,'误导新输入法','ThatGuyLonely'),V('qigyw8rxZw8',156,220,'误导（手部视角）','J R Way2Cold')]},
+ '突破急停拉回 → 投篮':{q:'snatchback',v:[V('ocyhMviieFQ',108,138,'Snatchback（手部视角）',LAB),V('hsIHVQutVsE',300,356,'后撤步 / 急停拉回',LAB)]},
+ 'Turbo Cross 逃脱 + 背后接力':{q:'escape cross explosive behind the back',v:[V('ocyhMviieFQ',89,108,'爆发背后（手部视角）',LAB),V('ocyhMviieFQ',138,163,'逃脱组合（手部视角）',LAB)]},
+ '后退拉开 → size-up → 后撤步':{q:'walkback dribble',v:[V('ocyhMviieFQ',163,185,'Walkback（手部视角）',LAB),V('yUuuEvDCgyI',346,409,'Walkback','PAC Hoops')]},
+ '突破护球 → 慢动作欧洲步':{q:'slow euro step L2 protect',v:[V(OGS,497,543,'L2 快速护球','Nayeem4K')]},
+ '突破 → 转身 → 爆发':{q:'spin move',v:[V(OGS,849,941,'转身教学（手部视角）','Nayeem4K'),V('hsIHVQutVsE',218,243,'转身',LAB)]},
+ '突破 → 半转身 → 急停跳投':{q:'half spin',v:[V(OGS,941,993,'半转身教学（手部视角）','Nayeem4K')]},
+ '迟疑 → 后撤步交叉 → 投篮':{q:'stepback crossover',v:[V('hsIHVQutVsE',300,356,'按住加速 + ↓ 的后撤动画',LAB),V('hsIHVQutVsE',243,300,'迟疑',LAB)]},
+ '内切外带 → 交叉 → 爆发':{q:'in and out crossover',v:[V('WIYU3HHUu0k',697,732,'Kyrie 内切外带 + 背后',KC)]},
+ '胯下 → 背后 双换手':{q:'between the legs behind the back',v:[V('hsIHVQutVsE',150,218,'移动中背后',LAB),V('qigyw8rxZw8',103,156,'背后与转身（手部视角）','J R Way2Cold')]},
+ '分解组合 → 爆发':{q:'breakdown combo',v:[V('hsIHVQutVsE',64,88,'分解组合',LAB),V('WIYU3HHUu0k',569,586,'Breakdown Combos',KC)]},
+ 'Lonzo 推进 连续换手':{q:'lonzo ball cross',v:[V('GhkjzSQETdM',200,231,'Lonzo Ball Cross','YOUNG DIRK')]},
+ '转身取消 → 原地发射':{q:'spin cancel',v:[V(OGS,993,1060,'取消接快速半转身（相关技巧）','Nayeem4K'),V('WIYU3HHUu0k',244,300,'Burst Cancel（相关技巧）',KC)]},
+ '穿裆 Nutmeg':{q:'nutmeg dribble',v:[V('qigyw8rxZw8',220,248,'穿裆（手部视角）','J R Way2Cold')]},
+ '按住加速 连续逃脱':{q:'escape dribble combos',v:[V('hsIHVQutVsE',88,127,'逃脱动作',LAB),V('WIYU3HHUu0k',934,988,'逃脱组合',KC)]},
+ '交叉 → 转身':{q:'crossover spin',v:[V('hsIHVQutVsE',218,243,'转身（含先交叉再转）',LAB),V('WIYU3HHUu0k',1135,1200,'转身合集',KC)]},
+};
+const mmss=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+let vidCur=null, vidRate=0.5;
+function ytCmd(func,args){ const f=document.querySelector('#vidBox iframe'); if(f) f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args||[]}),'*'); }
+function renderVids(){
+  const c=COMBOS[cur], d=VIDS[c.name]||{q:c.name,v:[]}, el=document.getElementById('vids');
+  vidCur=null;
+  el.innerHTML=`<div class="vh"><b>🎬 游戏里成功是什么样</b><span class="mut">（真实画面，点开才加载；片段只截了这个招的部分）</span></div>
+   <div class="vlist">${d.v.map((v,i)=>`<button class="vcard" data-i="${i}"><img loading="lazy" src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt=""><span><b>${v.label}</b><br><small>${v.by} · ${mmss(v.s)}–${mmss(v.e)}</small></span></button>`).join('')}</div>
+   <div id="vidBox"></div>
+   <div class="vctl" id="vidCtl" style="display:none">慢放 <span class="seg" id="segVR">${[0.25,0.5,1].map(r=>`<button data-v="${r}" class="${r===vidRate?'on':''}">${r}×</button>`).join('')}</span>
+     <button class="b2" id="vRe">↺ 重播片段</button><a id="vOpen" target="_blank">播不了？在 YouTube 打开这一段 ↗</a></div>
+   <div class="mut" style="font-size:13px;margin-top:6px">${d.v.length?'':'没找到这个招的专门片段。'}更多：<a target="_blank" href="https://www.youtube.com/results?search_query=${encodeURIComponent('NBA 2K26 '+d.q+' tutorial handcam')}">在 YouTube 搜「${d.q}」</a>　<span>（打不开的话需要能访问 YouTube 的网络）</span></div>`;
+  el.querySelectorAll('.vcard').forEach(b=>b.onclick=()=>openVid(d.v[+b.dataset.i],b));
+  bindSeg('segVR',r=>{ vidRate=+r; ytCmd('setPlaybackRate',[vidRate]); });
+  document.getElementById('vRe').onclick=()=>{ if(vidCur){ ytCmd('seekTo',[vidCur.s,true]); ytCmd('playVideo'); ytCmd('setPlaybackRate',[vidRate]); } };
+}
+function openVid(v,btn){
+  vidCur=v; document.querySelectorAll('#vids .vcard').forEach(b=>b.classList.toggle('on',b===btn));
+  const box=document.getElementById('vidBox');
+  box.innerHTML=`<iframe src="https://www.youtube.com/embed/${v.id}?start=${v.s}&end=${v.e}&autoplay=1&mute=1&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  document.getElementById('vidCtl').style.display='';
+  document.getElementById('vOpen').href=`https://www.youtube.com/watch?v=${v.id}&t=${v.s}s`;
+  const f=box.querySelector('iframe');
+  f.onload=()=>{ // iframe API 准备好后再设慢放；多发几次保证生效
+    ytCmd('addEventListener',['onReady']); [600,1500,3000].forEach(t=>setTimeout(()=>ytCmd('setPlaybackRate',[vidRate]),t)); };
+}
 
 bindSeg('segMode',setMode);
 renderAll(); selectCombo(0);
