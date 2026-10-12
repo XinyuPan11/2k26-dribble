@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2K26 手柄运球 · 第一性原理</title>
+<style>
+  :root{--bg:#0f1115;--card:#181b22;--line:#2a2f3a;--fg:#e8eaef;--mut:#8b93a3;--acc:#ff7a1a;--turbo:#ff3b5c;--ls:#3fa7ff;--rs:#ffb21a;--l2:#38d39f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:44px 0 12px;padding-left:10px;border-left:4px solid var(--acc)}
+  h3{margin:0 0 6px;font-size:17px}
+  .mut{color:var(--mut)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .bar{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{background:none;border:0;color:var(--mut);padding:6px 12px;cursor:pointer;font:inherit}
+  .seg button.on{background:var(--acc);color:#111;font-weight:600}
+  .k{display:inline-block;padding:0 7px;border-radius:5px;font-weight:700;font-size:13px;line-height:22px;border:1px solid}
+  .k.t{color:var(--turbo);border-color:var(--turbo)} .k.r{color:var(--rs);border-color:var(--rs)}
+  .k.l{color:var(--ls);border-color:var(--ls)} .k.p{color:var(--l2);border-color:var(--l2)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:500}
+  .big{font-size:22px;font-weight:700}
+  .formula{font-size:18px;text-align:center;padding:18px;line-height:2}
+  .compass{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:420px;margin:auto}
+  .compass div{background:#11141a;border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center;min-height:78px;font-size:13px}
+  .compass b{display:block;font-size:20px;color:var(--rs)}
+  .compass .c{display:flex;align-items:center;justify-content:center;color:var(--mut)}
+  .combo{display:grid;grid-template-columns:300px 1fr;gap:18px}
+  @media(max-width:720px){.combo{grid-template-columns:1fr}}
+  .steps{margin:8px 0 0;padding:0;list-style:none;counter-reset:s}
+  .steps li{counter-increment:s;padding:7px 10px 7px 38px;position:relative;border-radius:8px;margin-bottom:4px;transition:background .15s}
+  .steps li::before{content:counter(s);position:absolute;left:10px;top:8px;width:20px;height:20px;border-radius:50%;background:#262b35;text-align:center;line-height:20px;font-size:12px}
+  .steps li.now{background:#2a2216;outline:1px solid var(--acc)}
+  .play{background:var(--acc);color:#111;border:0;border-radius:8px;padding:7px 16px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}
+  .why{margin-top:10px;font-size:14px;color:#c9ced8;background:#12151b;border-radius:8px;padding:8px 12px}
+  .tag{font-size:12px;padding:1px 7px;border-radius:10px;background:#262b35;color:var(--mut);margin-left:6px;font-weight:400}
+  svg text{font-family:inherit}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .tabs button{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:20px;padding:6px 14px;cursor:pointer;font:inherit;font-size:14px}
+  .tabs button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
+  .pl-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .pl-top h3{display:inline;font-size:19px}
+  #pad svg{display:block;width:100%;max-width:760px;margin:6px auto 0}
+  .cap{text-align:center;min-height:64px;margin:4px 0 10px}
+  .capn{color:var(--acc);font-weight:700;font-size:14px}
+  .capt{font-size:20px;font-weight:600;line-height:1.6}
+  .tl{display:flex;gap:3px;height:12px;margin:0 0 12px}
+  .tl div{background:#262b35;border-radius:4px;position:relative;overflow:hidden;cursor:pointer}
+  .tl div.on{outline:1px solid var(--acc)}
+  .tl i{position:absolute;left:0;top:0;bottom:0;background:var(--acc);width:0}
+  .btns{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .b2{background:#262b35;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}
+  a{color:var(--ls)}
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>2K26 手柄运球</b>
+  <span>手柄 <span class="seg" id="segPad"><button data-v="ps" class="on">PS</button><button data-v="xb">Xbox</button></span></span>
+  <span>持球手 <span class="seg" id="segHand"><button data-v="R" class="on">右手</button><button data-v="L">左手</button></span></span>
+  <span class="mut" style="font-size:13px">所有方向会随持球手自动镜像</span>
+</div>
+
+<div class="wrap">
+<h1>别背招式表，理解 4 个“旋钮”就够了</h1>
+<p class="mut">给 200 小时老玩家的版本：跳过基础，只讲手柄的底层逻辑 + 能直接练的连招。每个连招都有“输入回放”动画，代替看视频。</p>
+
+<h2>① 第一性原理：所有运球 = 4 个变量的组合</h2>
+<div class="card formula">
+  招式 = <span class="k r">右摇杆 方向</span> × <span class="k r">拨 / 按住 / 速度</span> × <span class="k t" data-btn="RT">RT</span> 加速键 有无 × <span class="k l">左摇杆</span> 冲出方向
+</div>
+<div class="grid g4" style="margin-top:14px">
+  <div class="card"><h3><span class="k r">右摇杆</span> 选“哪个动作”</h3>方向一律<b>相对持球手</b>：往持球手那边 = 不换手（迟疑），往非持球手那边 = 换手（交叉）。往下 = 后撤，往上 = 向前试探。</div>
+  <div class="card"><h3><span class="k r">拨 vs 按住 vs 快慢</span></h3><b>轻拨回中</b> = 单个动作；<b>按住</b> = 更长的版本（逃脱/上篮类）。2K26 新增：<b>拨得快动作就快，拨得慢动作就慢</b>——这就是“节奏”的来源。</div>
+  <div class="card"><h3><span class="k t" data-btn="RT">RT</span> 把动作变“爆发版”</h3>同一个右摇杆方向，加不加加速键是两个不同的招：↓ 是后撤步，<span data-btn="RT">RT</span>+↓ 是急停拉回（snatchback）。<b>任何右摇杆动作之后按住加速 + 推左摇杆 = 爆发（burst）</b>。</div>
+  <div class="card"><h3><span class="k l">左摇杆</span> 决定“冲向哪”</h3>右摇杆只负责动作，<b>真正过人的是动作结束那一瞬间左摇杆指向的方向</b>（launch angle）。很多人连招不出效果，是左摇杆还指着防守人。另：<span class="k p" data-btn="LT">LT</span> 轻按护球、按住减速。</div>
+</div>
+<div class="card" style="margin-top:14px">
+  <b>一句话心法：</b>右摇杆“骗”，左摇杆+加速“走”。连招 = 骗（一次或两次）→ 看防守重心 → 走。<br>
+  <span class="mut">2K26 官方说明：运球输入更快、更容易被“打断/接续”，所以连招的关键是<b>在上一个动作球落地前输入下一个</b>，而不是等动画放完。</span>
+</div>
+
+<h2>② 右摇杆方向地图（持球手侧会随顶部开关镜像）</h2>
+<div class="grid g2">
+  <div class="card">
+    <h3>不按加速：<span class="mut" style="font-weight:400">轻拨回中</span></h3>
+    <div class="compass" id="cmpA"></div>
+  </div>
+  <div class="card">
+    <h3>按住 <span class="k t" data-btn="RT">RT</span> 加速：<span class="mut" style="font-weight:400">爆发 / 逃脱版</span></h3>
+    <div class="compass" id="cmpB"></div>
+  </div>
+</div>
+<div class="card" style="margin-top:14px">
+  <table>
+    <tr><th style="width:28%">其它关键输入</th><th>手柄</th><th>用途</th></tr>
+    <tr><td>Size-up 招牌试探</td><td><span class="k r">右摇杆</span> 左右来回摇 / 或连续向上拨（有节奏）</td><td>两种摇法 = 两套不同的 size-up 组合，取决于你装的招牌包</td></tr>
+    <tr><td>爆发 Burst</td><td>任意右摇杆动作 → 立刻按住 <span class="k t" data-btn="RT">RT</span> + <span class="k l">左摇杆</span></td><td>2K26 把爆发变简单了，这是所有连招的“收尾键”</td></tr>
+    <tr><td>变速 Change of pace</td><td>不按加速慢走 → 突然 <span class="k t" data-btn="RT">RT</span> + <span class="k l">左摇杆</span></td><td>对方伸手时用，不会出卡顿动画</td></tr>
+    <tr><td>后退拉开 Walkback</td><td>按住 <span class="k l">左摇杆↓</span> + <span class="k r">右摇杆↑</span> 拨一下（左摇杆全程按住）</td><td>拉开距离、重置回合，然后再开 size-up</td></tr>
+    <tr><td>转身</td><td><span class="k r">右摇杆</span> 从持球手侧画圈；画 1/4 圈 = 半转身</td><td>画得快慢同样影响速度</td></tr>
+    <tr><td>快速护球 / 顶住</td><td>轻按 <span class="k p" data-btn="LT">LT</span> / 按住 <span class="k p" data-btn="LT">LT</span></td><td>防抢断；突破中配合减速可把防守人“挂”在胯上</td></tr>
+    <tr><td>慢动作欧洲步</td><td>欧洲步过程中按住 <span class="k p" data-btn="LT">LT</span></td><td>你已会欧洲步——加这一下变成慢速拖步终结</td></tr>
+  </table>
+</div>
+
+<h2>③ 连招慢动作手柄回放</h2>
+<p class="mut">选一个连招 → 默认 0.25 倍慢放。摇杆后面的拖尾 = 刚刚走过的路径；扳机变红/绿 = 正在按住。用「下一步」可以一步一步看。键盘：空格 播放/暂停，← → 上一步/下一步。</p>
+<div class="tabs" id="tabs"></div>
+<div class="player card">
+  <div class="pl-top">
+    <div><h3 id="cName"></h3><span class="tag" id="cTag"></span></div>
+    <div class="ctrls">
+      <span class="seg" id="segSpd"><button data-v="0.15">0.15×</button><button data-v="0.25" class="on">0.25×</button><button data-v="0.5">0.5×</button><button data-v="1">1×</button></span>
+    </div>
+  </div>
+  <div id="pad"></div>
+  <div class="cap"><div class="capn" id="capN"></div><div class="capt" id="capT"></div></div>
+  <div class="tl" id="tl"></div>
+  <div class="btns">
+    <button class="b2" id="bPrev">◀ 上一步</button>
+    <button class="play" id="bPlay">▶ 播放全部</button>
+    <button class="b2" id="bNext">下一步 ▶</button>
+    <label class="mut" style="font-size:13px"><input type="checkbox" id="cLoop" checked> 循环</label>
+  </div>
+  <ol class="steps" id="steps"></ol>
+  <div class="why" id="why"></div>
+</div>
+
+<h2>④ 练习方法（最高效路径）</h2>
+<div class="grid g2">
+  <div class="card"><h3>1. 先单练“二段误导”</h3>它是 2K26 区分高手的输入：第一下不按加速，第二下按住加速且在<b>球第一次落地前</b>输入。在自由训练里只练这一个，直到不看手也能出。</div>
+  <div class="card"><h3>2. 每个动作都练“左摇杆收尾”</h3>同一个招，分别往 ↖ / ↑ / ↗ 三个方向冲出去各 10 次。你会发现过人成功率主要取决于这一步。</div>
+  <div class="card"><h3>3. 用快慢做节奏</h3>同一个 size-up，故意一次拨慢一次拨快。防守 AI 和真人都是对节奏反应，而不是对招式名。</div>
+  <div class="card"><h3>4. 检查动画和属性</h3>能不能出某个招很大程度取决于运球属性和你装的招牌动作包（size-up / escape / combo 包）。招不灵先查动画门槛，再怀疑手法。</div>
+</div>
+
+<h2>可信度说明 & 来源</h2>
+<div class="card mut" style="font-size:14px">
+  <span class="tag">官方</span> 迟疑/内切外带/胯下/背后/后撤/RT+↑ 分解组合/RT+↓ 后撤交叉/转身/LT 护球/慢欧洲步/size-up 两种摇法/摇杆快慢控速/误导与动量交叉 —— 来自 2K 官方指南与 Courtside Report。<br>
+  <span class="tag">手柄实录</span> 爆发、变速、误导的方向细节、snatchback、turbo cross、walkback —— 来自 NBA2KLab 2K26 手部视角教学。<br>
+  <span class="tag">整理</span> 连招的串法是我按以上输入组合的练习套路，不是官方招式名。各站对个别方向（如胯下 vs 交叉）描述略有出入，以游戏内“设置-操作”为准。<br><br>
+  <a href="https://nba.2k.com/zh-CN/2k26/game-guide/gameplay/" target="_blank">NBA 2K26 官方中文游戏指南</a> ·
+  <a href="https://nba.2k.com/2k26/courtside-report/gameplay/" target="_blank">2K26 Gameplay Courtside Report</a> ·
+  <a href="https://www.nba2klab.com/videos/nba-2k26-dribble-moves-breakdown" target="_blank">NBA2KLab 2K26 运球手部视角教学</a> ·
+  <a href="https://www.magicgameworld.com/?p=128291" target="_blank">MagicGameWorld 运球指南</a>
+</div>
+</div>
+
+<script>
+// 方向用“相对当前持球手”记：B=持球手侧 O=非持球手侧
+const BTN={ps:{RT:'R2',LT:'L2',SHOOT:'□'},xb:{RT:'RT',LT:'LT',SHOOT:'X'}};
+let pad='ps',hand='R',speed=0.25;
+
+const MAP_A={UO:'交叉 Cross<br><small>动量交叉起手</small>',U:'内切外带<br><small>连拨=size-up</small>',UB:'—',
+  O:'胯下交叉<br><small>换手</small>',C:'',B:'迟疑 Hesi<br><small>不换手</small>',
+  DO:'背后运球<br><small>往非持球手侧下斜</small>',D:'后撤步',DB:'—'};
+const MAP_B={UO:'Turbo Cross<br><small>逃脱交叉</small>',U:'分解组合<br><small>Breakdown</small>',UB:'—',
+  O:'组合 Combo<br><small>左右来回拨</small>',C:'+ RT',B:'组合 Combo<br><small>左右来回拨</small>',
+  DO:'爆发背后<br><small>再推左摇杆斜上</small>',D:'急停拉回<br><small>Snatchback / 后撤交叉</small>',DB:'—'};
+const ORDER=['UO','U','UB','O','C','B','DO','D','DB'];
+function scr(d,flip){ if(!d) return null; const right=(hand==='R')!==!!flip;
+  return d.replace(/O/g,right?'L':'R').replace(/B/g,right?'R':'L'); }
+const ARROW={U:'↑',D:'↓',L:'←',R:'→',UL:'↖',UR:'↗',DL:'↙',DR:'↘'};
+const VEC={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0],UL:[-.71,-.71],UR:[.71,-.71],DL:[-.71,.71],DR:[.71,.71]};
+
+function renderCompass(){
+  for(const [id,map] of [['cmpA',MAP_A],['cmpB',MAP_B]]){
+    const el=document.getElementById(id); el.innerHTML='';
+    for(const s of ['UL','U','UR','L','C','R','DL','D','DR']){
+      const rel=ORDER.find(r=>r!=='C'&&scr(r)===s);
+      const div=document.createElement('div');
+      if(s==='C'){div.className='c';div.innerHTML=map.C?map.C.replace('RT',BTN[pad].RT):'<span>持球：'+(hand==='R'?'右手':'左手')+'</span>';}
+      else div.innerHTML='<b>'+ARROW[s]+'</b>'+(map[rel]||'');
+      if(map[rel]==='—') div.style.opacity=.35;
+      el.appendChild(div);
+    }
+  }
+}
+
+// ====== 连招数据 ======
+// phase = 一步（一句说明）；seq = 这一步里摇杆/扳机的关键帧
+// rs/ls = 方向（相对当前持球手）；m/lm = 动作说明；t = 按住加速；l2 = 'tap'|'hold'；ms = 原速时长
+const F=(d,ms=260)=>[{rs:d,ms,m:'轻拨'},{rs:null,ms:140}];   // 拨一下回中
+const COMBOS=[
+ {name:'节奏试探 → 迟疑 → 爆发',tag:'最稳的基础盘',
+  why:'size-up 的目的不是过人，是让防守人跟你的节奏走。迟疑让他重心前压，此时立刻爆发。核心：迟疑之后不要再加花活，直接走。',
+  phases:[
+   {txt:'右摇杆 左右来回摇 = size-up（一次慢、一次快，制造节奏）',seq:[{rs:'O',ms:520,m:'摇'},{rs:'B',ms:520,m:'摇'},{rs:'O',ms:300,m:'快摇'},{rs:'B',ms:300,m:'快摇'},{rs:null,ms:300}]},
+   {txt:'右摇杆 往持球手侧轻拨，马上回中 = 迟疑 Hesi',seq:F('B',260)},
+   {txt:'立刻按住 RT + 左摇杆 往持球手侧斜上冲出 = 爆发',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+ {name:'动量交叉 Momentum Cross',tag:'官方示范连招',
+  why:'先向上拨让球员“往前试探”，防守人后撤的瞬间往非持球手侧斜着冲，产生换手+提速的交叉。重点是“立刻”——上拨和按加速之间几乎没有停顿。',
+  phases:[
+   {txt:'右摇杆 向上轻拨，马上回中',seq:F('U',240)},
+   {txt:'立刻按住 RT + 左摇杆 往非持球手侧斜上冲',seq:[{t:1,ls:'UO',ms:1300,lm:'推住冲'}]}]},
+ {name:'二段误导 Misdirection',tag:'高手分水岭',
+  why:'第一下不按加速 = 假动作，决定动画类型（↙背后 / ←胯下 / ↖交叉）；第二下按住加速往反方向拨 = 真动作，必须在第一下的球落地前输入。第二下方向不重要，按住加速才是关键。',
+  phases:[
+   {txt:'第一下（不按加速）：右摇杆 往非持球手侧下斜拨 → 背后假动作',seq:F('DO',240)},
+   {txt:'球落地前：按住 RT，右摇杆 往反方向拨',seq:[{t:1,rs:'B',ms:260,m:'轻拨'},{t:1,rs:null,ms:140}]},
+   {txt:'继续按住 RT + 左摇杆 往你想去的方向冲',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+ {name:'突破急停拉回 → 投篮',tag:'得分后卫必备',
+  why:'突破时防守人跟着你跑，突然 加速+↓ 急停把球拉回，空间瞬间出来。之后可以直接投，也可以再接一次爆发往别的方向走。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前突破',seq:[{t:1,ls:'U',ms:1000,lm:'推住'}]},
+   {txt:'左摇杆保持向前，按住 RT + 右摇杆 向下拨 = 急停拉回 Snatchback',seq:[{t:1,ls:'U',lm:'保持',rs:'D',ms:300,m:'轻拨'},{t:1,ls:'U',lm:'保持',ms:140},{ms:350}]},
+   {txt:'右摇杆 先向下按住，再向上推 = 投篮（或直接按投篮键）',seq:[{rs:'D',ms:450,m:'向下按住'},{rs:'U',ms:300,m:'向上推出手'},{ms:400}]}]},
+ {name:'Turbo Cross 逃脱 + 背后接力',tag:'连续换手',
+  why:'加速交叉把防守人甩向一侧，他回追时接一个加速背后把方向再折回来。两个都是加速版本，所以手指一直压着加速键不放。注意第 3 步时球已经在另一只手，方向也跟着镜像了。',
+  phases:[
+   {txt:'按住 RT + 右摇杆 往非持球手侧斜上拨 = Turbo Cross',seq:[{t:1,rs:'UO',ms:280,m:'轻拨'},{t:1,ms:140}]},
+   {txt:'继续按住 RT + 左摇杆 往同侧斜上冲',seq:[{t:1,ls:'UO',ms:800,lm:'推住冲'}]},
+   {flip:1,txt:'球已换手！按住 RT + 右摇杆 往（新的）非持球手侧下斜 = 加速背后',seq:[{t:1,rs:'DO',ms:280,m:'轻拨'},{t:1,ms:140}]},
+   {txt:'左摇杆 往回折，斜上冲出',seq:[{t:1,ls:'UO',ms:1100,lm:'推住冲'}]}]},
+ {name:'后退拉开 → size-up → 后撤步',tag:'重置回合 / 投手',
+  why:'被贴死时先 walkback 拉开距离，再用连续上拨 size-up 把对方吸上来，最后后撤步出手。适合有投篮能力的建模。',
+  phases:[
+   {txt:'左摇杆 向下按住不放 + 右摇杆 向上拨一下 = Walkback',seq:[{ls:'D',lm:'按住',rs:'U',ms:280,m:'轻拨'},{ls:'D',lm:'按住',ms:700},{ms:250}]},
+   {txt:'右摇杆 连续向上拨两次 = 向上型 size-up',seq:[...F('U',220),...F('U',220)]},
+   {txt:'右摇杆 向下轻拨 = 后撤步，落地投篮',seq:[...F('D',260),{ms:500}]}]},
+ {name:'突破护球 → 慢动作欧洲步',tag:'终结升级',
+  why:'你已经会欧洲步了。2K26 的升级：突破时轻按 LT 护球把防守人挂在胯上；欧洲步中按住 LT 减速，变成慢速拖步，打乱盖帽时机。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前突破',seq:[{t:1,ls:'U',ms:800,lm:'推住'}]},
+   {txt:'轻按 LT 一下 = 快速护球',seq:[{t:1,ls:'U',lm:'保持',l2:'tap',ms:220},{t:1,ls:'U',lm:'保持',ms:400}]},
+   {txt:'进禁区：右摇杆 往非持球手侧下斜按住 = 欧洲步',seq:[{ls:'U',lm:'保持',rs:'DO',ms:450,m:'按住'}]},
+   {txt:'欧洲步过程中 按住 LT = 减速，慢动作拖步终结',seq:[{ls:'U',lm:'保持',rs:'DO',m:'按住',l2:'hold',ms:1100},{ms:300}]}]},
+ {name:'突破 → 转身 → 爆发',tag:'转身 Spin',
+  why:'转身 = 右摇杆从持球手侧开始，经过下方画到另一侧（右手持球时是顺时针半圈，左手自动镜像为逆时针）。画得越快转得越快。防守人贴着你突破侧时用，转完立刻加速 + 左摇杆往新方向斜上冲。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前突破，逼防守人贴上来',seq:[{t:1,ls:'U',ms:900,lm:'推住'}]},
+   {txt:'右摇杆 从持球手侧 → 下 → 非持球手侧，画半圈 = 转身',seq:[{t:1,ls:'U',lm:'保持',rs:'B',ms:120,m:'画圈起点'},{t:1,ls:'U',lm:'保持',rs:'DB',ms:110,m:'画圈'},{t:1,ls:'U',lm:'保持',rs:'D',ms:110,m:'画圈'},{t:1,ls:'U',lm:'保持',rs:'DO',ms:110,m:'画圈'},{t:1,ls:'U',lm:'保持',rs:'O',ms:160,m:'画到这松开'},{t:1,ms:140}]},
+   {flip:1,txt:'转身后球换手：按住 RT + 左摇杆 往转出来的那一侧斜上冲',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+ {name:'突破 → 半转身 → 急停跳投',tag:'半转身 Half Spin',
+  why:'半转身只画 1/4 圈（持球手侧 → 下）。它不会完整转过去，而是假装要转然后停住，防守人往转身方向扑，你原地拉起来投。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前突破',seq:[{t:1,ls:'U',ms:900,lm:'推住'}]},
+   {txt:'右摇杆 从持球手侧 → 下，只画 1/4 圈 = 半转身',seq:[{ls:'U',lm:'保持',rs:'B',ms:130,m:'画圈起点'},{ls:'U',lm:'保持',rs:'DB',ms:120,m:'画圈'},{ls:'U',lm:'保持',rs:'D',ms:180,m:'1/4 圈松开'},{ms:300}]},
+   {txt:'右摇杆 向下按住 → 向上推 = 急停跳投',seq:[{rs:'D',ms:450,m:'向下按住'},{rs:'U',ms:300,m:'向上推出手'},{ms:400}]}]},
+ {name:'迟疑 → 后撤步交叉 → 投篮',tag:'后撤步交叉 Stepback Cross',
+  why:'普通后撤步 = 右摇杆↓（不按加速）；按住加速再拨↓ = 后撤步交叉，后撤的同时把球换到另一只手，往斜后方撤，空间更大。先用迟疑把防守人吸上来再撤，效果最好。',
+  phases:[
+   {txt:'右摇杆 往持球手侧轻拨 = 迟疑，把防守人吸上来',seq:F('B',260)},
+   {txt:'按住 RT + 右摇杆 向下轻拨 = 后撤步交叉（换手往后撤）',seq:[{t:1,rs:'D',ms:280,m:'轻拨'},{t:1,ms:160},{ms:350}]},
+   {flip:1,txt:'落地立刻投：右摇杆 向下按住 → 向上推',seq:[{rs:'D',ms:450,m:'向下按住'},{rs:'U',ms:300,m:'向上推出手'},{ms:400}]}]},
+ {name:'内切外带 → 交叉 → 爆发',tag:'假不换手、真换手',
+  why:'内切外带（↑）看起来要往非持球手侧换手，但球留在原手；防守人刚往那边移，你真的交叉换手再爆发。两个都是轻拨，不按加速，最后才加速。',
+  phases:[
+   {txt:'右摇杆 向上轻拨 = 内切外带（假换手）',seq:F('U',260)},
+   {txt:'右摇杆 往非持球手侧轻拨 = 交叉/胯下（真换手）',seq:F('O',260)},
+   {flip:1,txt:'按住 RT + 左摇杆 往换手后的持球手侧斜上冲',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+ {name:'胯下 → 背后 双换手',tag:'来回换手',
+  why:'胯下把球换到另一只手，背后再换回来，防守人左右各被晃一次。注意第 2 步时球已在另一只手，所以“往非持球手侧下斜”的屏幕方向是镜像过来的——看动画里球在哪只手。',
+  phases:[
+   {txt:'右摇杆 往非持球手侧轻拨 = 胯下换手',seq:F('O',260)},
+   {flip:1,txt:'球已换手：右摇杆 往（新的）非持球手侧下斜轻拨 = 背后换回来',seq:F('DO',260)},
+   {flip:1,txt:'球回到原手：按住 RT + 左摇杆 往持球手侧斜上冲',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+ {name:'分解组合 → 爆发',tag:'Breakdown Combo',
+  why:'按住加速 + 右摇杆↑ 会出你装的招牌组合（一连串运球），是官方指南里专门用来把防守人晃出位置的输入。组合动画结束前就推左摇杆指好方向，最后一下运完直接走。',
+  phases:[
+   {txt:'按住 RT + 右摇杆 向上轻拨 = 分解组合',seq:[{t:1,rs:'U',ms:300,m:'轻拨'},{t:1,ms:600}]},
+   {txt:'组合快结束时：按住 RT + 左摇杆 往防守人重心的反方向冲',seq:[{t:1,ls:'UO',ms:1200,lm:'推住冲'}]}]},
+];
+
+// ====== 手柄 SVG ======
+const LAYOUT={ps:{LS:[275,262],RS:[485,262],DP:[160,170],FB:[600,170]},xb:{LS:[160,170],RS:[485,262],DP:[275,262],FB:[600,170]}};
+const GATE=60,TRAVEL=42,CAP=25;
+function padSVG(){
+  const L=LAYOUT[pad];
+  const ticks=c=>Object.values(VEC).map(v=>`<line x1="${c[0]+v[0]*(GATE-8)}" y1="${c[1]+v[1]*(GATE-8)}" x2="${c[0]+v[0]*GATE}" y2="${c[1]+v[1]*GATE}" stroke="#444b58" stroke-width="2"/>`).join('');
+  const stick=(id,c,col,name)=>`
+    <circle cx="${c[0]}" cy="${c[1]}" r="${GATE}" fill="#0b0d11" stroke="${col}" stroke-opacity=".5" stroke-width="2"/>${ticks(c)}
+    <line id="${id}Ghost" x1="${c[0]}" y1="${c[1]}" x2="${c[0]}" y2="${c[1]}" stroke="${col}" stroke-width="3" stroke-dasharray="5 5" opacity="0"/>
+    <polyline id="${id}Trail" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+    <circle id="${id}Cap" cx="${c[0]}" cy="${c[1]}" r="${CAP}" fill="${col}" stroke="#000" stroke-opacity=".4" stroke-width="3"/>
+    <circle id="${id}Dot" cx="${c[0]}" cy="${c[1]}" r="5" fill="#111"/>
+    <text x="${c[0]}" y="${c[1]+GATE+22}" text-anchor="middle" fill="${col}" font-size="14" font-weight="700">${name}</text>
+    <text id="${id}Act" x="${c[0]}" y="${c[1]+GATE+46}" text-anchor="middle" fill="#fff" font-size="20" font-weight="800"></text>`;
+  const trig=(id,x,lbl,col)=>`
+    <rect id="${id}" x="${x}" y="14" width="140" height="40" rx="12" fill="#262b35" stroke="${col}" stroke-width="2"/>
+    <text x="${x+70}" y="40" text-anchor="middle" fill="#fff" font-size="17" font-weight="800">${lbl}</text>
+    <text id="${id}Act" x="${x+70}" y="76" text-anchor="middle" fill="${col}" font-size="16" font-weight="800"></text>`;
+  const dp=L.DP,fb=L.FB;
+  return `<svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg">
+   <path d="M150 92 Q380 66 610 92 Q705 104 725 230 Q748 372 662 402 Q600 418 556 336 Q380 306 204 336 Q160 418 98 402 Q12 372 35 230 Q55 104 150 92Z" fill="#1e222b" stroke="#333a47" stroke-width="2"/>
+   ${trig('trL',105,BTN[pad].LT,'#38d39f')}${trig('trR',515,BTN[pad].RT,'#ff3b5c')}
+   <g opacity=".35" fill="#8b93a3">
+     <rect x="${dp[0]-11}" y="${dp[1]-34}" width="22" height="68" rx="4"/><rect x="${dp[0]-34}" y="${dp[1]-11}" width="68" height="22" rx="4"/>
+     <circle cx="${fb[0]}" cy="${fb[1]-30}" r="13"/><circle cx="${fb[0]}" cy="${fb[1]+30}" r="13"/><circle cx="${fb[0]-30}" cy="${fb[1]}" r="13"/><circle cx="${fb[0]+30}" cy="${fb[1]}" r="13"/>
+   </g>
+   <text x="${fb[0]-30}" y="${fb[1]+5}" text-anchor="middle" fill="#111" font-size="13" font-weight="700" opacity=".7">${BTN[pad].SHOOT}</text>
+   <text id="ballHand" x="380" y="150" text-anchor="middle" fill="#ffb21a" font-size="18" font-weight="800"></text>
+   <text x="380" y="174" text-anchor="middle" fill="#8b93a3" font-size="12">方向随持球手镜像</text>
+   ${stick('ls',L.LS,'#3fa7ff','左摇杆 · 往哪走')}
+   ${stick('rs',L.RS,'#ffb21a','右摇杆 · 做什么')}
+  </svg>`;
+}
+
+// ====== 播放器 ======
+let cur=0, kf=[], phaseStart=[], phaseEnd=[], total=0, tau=0, playing=false, stopAt=null, lastNow=0, trails={ls:[],rs:[]}, loopWait=0;
+const ease=k=>1-Math.pow(1-k,3);
+function vec(d,flip){ const s=scr(d,flip); return s?VEC[s]:[0,0]; }
+function build(){
+  const c=COMBOS[cur]; kf=[];phaseStart=[];phaseEnd=[]; let T=0,flip=false,prev={ls:[0,0],rs:[0,0]};
+  c.phases.forEach((p,i)=>{ if(p.flip) flip=!flip; phaseStart[i]=T;
+    p.seq.forEach(s=>{ const to={ls:vec(s.ls,flip),rs:vec(s.rs,flip)};
+      kf.push({T,ms:s.ms,tw:Math.min(170,s.ms*.5),from:prev,to,s,p:i,flip}); T+=s.ms; prev=to; });
+    phaseEnd[i]=T; });
+  total=T;
+}
+function frameAt(t){ let k=kf.find(f=>t>=f.T&&t<f.T+f.ms); if(!k) k=kf[kf.length-1]; return k; }
+function phaseOf(t){ for(let i=phaseEnd.length-1;i>=0;i--) if(t>=phaseStart[i]) return i; return 0; }
+
+function render(){
+  const f=frameAt(Math.min(tau,total-0.01)), e=ease(Math.min(1,(tau-f.T)/f.tw));
+  const L=LAYOUT[pad], P=phaseOf(Math.min(tau,total-0.01)), ph=COMBOS[cur].phases[P];
+  for(const st of ['ls','rs']){
+    const c=st==='ls'?L.LS:L.RS, a=f.from[st], b=f.to[st];
+    const x=c[0]+(a[0]+(b[0]-a[0])*e)*TRAVEL, y=c[1]+(a[1]+(b[1]-a[1])*e)*TRAVEL;
+    const cap=document.getElementById(st+'Cap'),dot=document.getElementById(st+'Dot');
+    cap.setAttribute('cx',x);cap.setAttribute('cy',y);dot.setAttribute('cx',x);dot.setAttribute('cy',y);
+    const tr=trails[st]; tr.push([x,y,tau]); while(tr.length&&tau-tr[0][2]>450) tr.shift();
+    document.getElementById(st+'Trail').setAttribute('points',tr.map(p=>p[0]+','+p[1]).join(' '));
+    const d=st==='ls'?f.s.ls:f.s.rs, g=document.getElementById(st+'Ghost');
+    if(d){ const v=vec(d,f.flip); g.setAttribute('x2',c[0]+v[0]*(GATE+4)); g.setAttribute('y2',c[1]+v[1]*(GATE+4)); g.setAttribute('opacity',.9);} else g.setAttribute('opacity',0);
+    const s=scr(d,f.flip), back=!d&&(a[0]||a[1])&&e<1;
+    document.getElementById(st+'Act').textContent= s? ARROW[s]+' '+(st==='ls'?(f.s.lm||'推住'):(f.s.m||'轻拨')) : (back?'↺ 回中':'');
+  }
+  const tR=document.getElementById('trR'),tL=document.getElementById('trL');
+  tR.setAttribute('fill',f.s.t?'#ff3b5c':'#262b35'); tR.setAttribute('transform',f.s.t?'translate(0,6)':'');
+  document.getElementById('trRAct').textContent=f.s.t?'按住 加速':'';
+  tL.setAttribute('fill',f.s.l2?'#38d39f':'#262b35'); tL.setAttribute('transform',f.s.l2?'translate(0,6)':'');
+  document.getElementById('trLAct').textContent=f.s.l2==='tap'?'轻按一下':f.s.l2?'按住 减速':'';
+  document.getElementById('ballHand').textContent='🏀 球在'+(((hand==='R')!==f.flip)?'右手':'左手');
+  document.getElementById('capN').textContent=`第 ${P+1} / ${phaseEnd.length} 步`;
+  document.getElementById('capT').innerHTML=fmt(ph.txt);
+  document.querySelectorAll('#steps li').forEach((li,i)=>li.classList.toggle('now',i===P));
+  document.querySelectorAll('#tl div').forEach((d,i)=>{ d.classList.toggle('on',i===P);
+    const p=Math.max(0,Math.min(1,(tau-phaseStart[i])/(phaseEnd[i]-phaseStart[i]))); d.firstChild.style.width=(p*100)+'%'; });
+  document.getElementById('bPlay').textContent=playing?'⏸ 暂停':'▶ 播放全部';
+}
+function loop(now){
+  const dt=(now-lastNow)*speed; lastNow=now;
+  if(playing){
+    if(loopWait>0){ loopWait-=dt; if(loopWait<=0){ tau=0; trails={ls:[],rs:[]}; } }
+    else{ tau+=dt;
+      if(stopAt!==null&&tau>=stopAt){ tau=stopAt-0.01; playing=false; stopAt=null; }
+      else if(tau>=total){ tau=total-0.01; if(document.getElementById('cLoop').checked) loopWait=900*speed; else playing=false; } }
+  }
+  render(); requestAnimationFrame(loop);
+}
+function playPhase(i){ i=Math.max(0,Math.min(phaseEnd.length-1,i)); tau=phaseStart[i]; stopAt=phaseEnd[i]; trails={ls:[],rs:[]}; loopWait=0; playing=true; }
+function fmt(t){
+  const b=BTN[pad];
+  return t.replace(/RT/g,`<span class="k t">${b.RT}</span>`).replace(/LT/g,`<span class="k p">${b.LT}</span>`)
+   .replace(/左摇杆/g,'<span class="k l">左摇杆</span>').replace(/右摇杆/g,'<span class="k r">右摇杆</span>').replace(/投篮键/g,`投篮键 <span class="k r">${b.SHOOT}</span>`);
+}
+function selectCombo(i){
+  cur=i; const c=COMBOS[i]; build();
+  document.querySelectorAll('#tabs button').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.getElementById('cName').textContent=c.name; document.getElementById('cTag').textContent=c.tag;
+  document.getElementById('steps').innerHTML=c.phases.map(p=>`<li>${fmt(p.txt)}</li>`).join('');
+  document.querySelectorAll('#steps li').forEach((li,j)=>{li.style.cursor='pointer';li.onclick=()=>playPhase(j);});
+  document.getElementById('why').innerHTML='💡 '+fmt(c.why);
+  document.getElementById('tl').innerHTML=c.phases.map((p,j)=>`<div style="flex:${phaseEnd[j]-phaseStart[j]}"><i></i></div>`).join('');
+  document.querySelectorAll('#tl div').forEach((d,j)=>d.onclick=()=>playPhase(j));
+  tau=0; trails={ls:[],rs:[]}; stopAt=null; loopWait=0; playing=true;
+}
+
+document.getElementById('tabs').innerHTML=COMBOS.map((c,i)=>`<button>${i+1}. ${c.name}</button>`).join('');
+document.querySelectorAll('#tabs button').forEach((b,i)=>b.onclick=()=>selectCombo(i));
+document.getElementById('bPlay').onclick=()=>{ if(playing){playing=false;} else { stopAt=null; if(tau>=total-1){tau=0;trails={ls:[],rs:[]};} playing=true; } };
+document.getElementById('bNext').onclick=()=>{ const P=phaseOf(tau); playPhase(tau<1&&!playing?0:P+1); };
+document.getElementById('bPrev').onclick=()=>playPhase(phaseOf(tau)-1);
+document.addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault();document.getElementById('bPlay').click();}
+  if(e.code==='ArrowRight')document.getElementById('bNext').click(); if(e.code==='ArrowLeft')document.getElementById('bPrev').click(); });
+
+function bindSeg(id,fn){ document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); fn(b.dataset.v); }); }
+function renderAll(){
+  document.querySelectorAll('[data-btn]').forEach(e=>e.textContent=BTN[pad][e.dataset.btn]);
+  renderCompass(); document.getElementById('pad').innerHTML=padSVG(); trails={ls:[],rs:[]};
+  const p=playing,t=tau,s=stopAt; selectCombo(cur); playing=p; tau=t; stopAt=s;
+}
+bindSeg('segPad',v=>{pad=v;renderAll();}); bindSeg('segHand',v=>{hand=v;renderAll();}); bindSeg('segSpd',v=>speed=+v);
+renderAll(); selectCombo(0);
+lastNow=performance.now(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
