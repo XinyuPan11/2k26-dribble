@@ -57,6 +57,14 @@
   .tl div.on{outline:1px solid var(--acc)}
   .tl i{position:absolute;left:0;top:0;bottom:0;background:var(--acc);width:0}
   .btns{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .ppad{font-size:14px;padding:8px 12px;border-radius:8px;margin-top:10px}
+  .ppad.off{background:#2c1418;border:1px solid #5a2630} .ppad.on{background:#12291f;border:1px solid #1f5a40}
+  .pstats{font-size:13px;color:var(--mut);margin-top:6px;text-align:right}
+  .pmsg{text-align:center;font-size:18px;font-weight:700;min-height:28px;margin-bottom:8px}
+  .pmsg.bad{color:#ff5c77} .pmsg.good{color:#38d39f}
+  .steps li.ok{background:#12291f} .steps li.ok::before{content:'✓';background:#38d39f;color:#111}
+  .steps li.bad{background:#2c1418;outline:1px solid var(--turbo)} .steps li.bad::before{content:'✕';background:var(--turbo)}
+  .ctrls{display:flex;gap:10px;flex-wrap:wrap}
   .b2{background:#262b35;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font:inherit}
   a{color:var(--ls)}
 </style>
@@ -119,13 +127,20 @@
   <div class="pl-top">
     <div><h3 id="cName"></h3><span class="tag" id="cTag"></span></div>
     <div class="ctrls">
+      <span class="seg" id="segMode"><button data-v="demo" class="on">🎬 演示</button><button data-v="practice">🎮 练习（接手柄）</button></span>
       <span class="seg" id="segSpd"><button data-v="0.15">0.15×</button><button data-v="0.25" class="on">0.25×</button><button data-v="0.5">0.5×</button><button data-v="1">1×</button></span>
     </div>
   </div>
+  <div id="prac" style="display:none">
+    <div id="pPad" class="ppad off"></div>
+    <div class="mut" style="font-size:13px;margin-top:6px">照着「现在要」做：每一步检查方向、加速键、轻拨还是按住、和上一步的间隔。做错会告诉你错在哪，1 秒后自动重来；超过 3 秒没接下一步也会重来。虚线 = 这一步该推的方向。</div>
+    <div class="pstats" id="pStats"></div>
+  </div>
   <div id="pad"></div>
   <div class="cap"><div class="capn" id="capN"></div><div class="capt" id="capT"></div></div>
+  <div class="pmsg" id="pMsg"></div>
   <div class="tl" id="tl"></div>
-  <div class="btns">
+  <div class="btns" id="btnsDemo">
     <button class="b2" id="bPrev">◀ 上一步</button>
     <button class="play" id="bPlay">▶ 播放全部</button>
     <button class="b2" id="bNext">下一步 ▶</button>
@@ -151,7 +166,8 @@
   <a href="https://nba.2k.com/zh-CN/2k26/game-guide/gameplay/" target="_blank">NBA 2K26 官方中文游戏指南</a> ·
   <a href="https://nba.2k.com/2k26/courtside-report/gameplay/" target="_blank">2K26 Gameplay Courtside Report</a> ·
   <a href="https://www.nba2klab.com/videos/nba-2k26-dribble-moves-breakdown" target="_blank">NBA2KLab 2K26 运球手部视角教学</a> ·
-  <a href="https://www.magicgameworld.com/?p=128291" target="_blank">MagicGameWorld 运球指南</a>
+  <a href="https://www.magicgameworld.com/?p=128291" target="_blank">MagicGameWorld 运球指南</a> ·
+  <a href="https://www.operationsports.com/the-ultimate-dribble-tutorial-for-nba-2k26/" target="_blank">Operation Sports 2K26 运球教程</a>（标「社区技巧」的连招来源）
 </div>
 </div>
 
@@ -196,17 +212,17 @@ const COMBOS=[
   phases:[
    {txt:'右摇杆 左右来回摇 = size-up（一次慢、一次快，制造节奏）',seq:[{rs:'O',ms:520,m:'摇'},{rs:'B',ms:520,m:'摇'},{rs:'O',ms:300,m:'快摇'},{rs:'B',ms:300,m:'快摇'},{rs:null,ms:300}]},
    {txt:'右摇杆 往持球手侧轻拨，马上回中 = 迟疑 Hesi',seq:F('B',260)},
-   {txt:'立刻按住 RT + 左摇杆 往持球手侧斜上冲出 = 爆发',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
+   {gap:450,txt:'立刻按住 RT + 左摇杆 往持球手侧斜上冲出 = 爆发',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
  {name:'动量交叉 Momentum Cross',tag:'官方示范连招',
   why:'先向上拨让球员“往前试探”，防守人后撤的瞬间往非持球手侧斜着冲，产生换手+提速的交叉。重点是“立刻”——上拨和按加速之间几乎没有停顿。',
   phases:[
    {txt:'右摇杆 向上轻拨，马上回中',seq:F('U',240)},
-   {txt:'立刻按住 RT + 左摇杆 往非持球手侧斜上冲',seq:[{t:1,ls:'UO',ms:1300,lm:'推住冲'}]}]},
+   {gap:350,txt:'立刻按住 RT + 左摇杆 往非持球手侧斜上冲',seq:[{t:1,ls:'UO',ms:1300,lm:'推住冲'}]}]},
  {name:'二段误导 Misdirection',tag:'高手分水岭',
   why:'第一下不按加速 = 假动作，决定动画类型（↙背后 / ←胯下 / ↖交叉）；第二下按住加速往反方向拨 = 真动作，必须在第一下的球落地前输入。第二下方向不重要，按住加速才是关键。',
   phases:[
-   {txt:'第一下（不按加速）：右摇杆 往非持球手侧下斜拨 → 背后假动作',seq:F('DO',240)},
-   {txt:'球落地前：按住 RT，右摇杆 往反方向拨',seq:[{t:1,rs:'B',ms:260,m:'轻拨'},{t:1,rs:null,ms:140}]},
+   {noT:1,txt:'第一下（不按加速）：右摇杆 往非持球手侧下斜拨 → 背后假动作',seq:F('DO',240)},
+   {gap:350,txt:'球落地前：按住 RT，右摇杆 往反方向拨',seq:[{t:1,rs:'B',ms:260,m:'轻拨'},{t:1,rs:null,ms:140}]},
    {txt:'继续按住 RT + 左摇杆 往你想去的方向冲',seq:[{t:1,ls:'UB',ms:1200,lm:'推住冲'}]}]},
  {name:'突破急停拉回 → 投篮',tag:'得分后卫必备',
   why:'突破时防守人跟着你跑，突然 加速+↓ 急停把球拉回，空间瞬间出来。之后可以直接投，也可以再接一次爆发往别的方向走。',
@@ -226,14 +242,13 @@ const COMBOS=[
   phases:[
    {txt:'左摇杆 向下按住不放 + 右摇杆 向上拨一下 = Walkback',seq:[{ls:'D',lm:'按住',rs:'U',ms:280,m:'轻拨'},{ls:'D',lm:'按住',ms:700},{ms:250}]},
    {txt:'右摇杆 连续向上拨两次 = 向上型 size-up',seq:[...F('U',220),...F('U',220)]},
-   {txt:'右摇杆 向下轻拨 = 后撤步，落地投篮',seq:[...F('D',260),{ms:500}]}]},
+   {noT:1,txt:'右摇杆 向下轻拨（不按加速）= 后撤步，落地投篮',seq:[...F('D',260),{ms:500}]}]},
  {name:'突破护球 → 慢动作欧洲步',tag:'终结升级',
   why:'你已经会欧洲步了。2K26 的升级：突破时轻按 LT 护球把防守人挂在胯上；欧洲步中按住 LT 减速，变成慢速拖步，打乱盖帽时机。',
   phases:[
    {txt:'按住 RT + 左摇杆 向前突破',seq:[{t:1,ls:'U',ms:800,lm:'推住'}]},
    {txt:'轻按 LT 一下 = 快速护球',seq:[{t:1,ls:'U',lm:'保持',l2:'tap',ms:220},{t:1,ls:'U',lm:'保持',ms:400}]},
-   {txt:'进禁区：右摇杆 往非持球手侧下斜按住 = 欧洲步',seq:[{ls:'U',lm:'保持',rs:'DO',ms:450,m:'按住'}]},
-   {txt:'欧洲步过程中 按住 LT = 减速，慢动作拖步终结',seq:[{ls:'U',lm:'保持',rs:'DO',m:'按住',l2:'hold',ms:1100},{ms:300}]}]},
+   {txt:'进禁区：右摇杆 往非持球手侧下斜按住 = 欧洲步，同时按住 LT 减速 = 慢动作拖步',seq:[{ls:'U',lm:'保持',rs:'DO',ms:450,m:'按住'},{ls:'U',lm:'保持',rs:'DO',m:'按住 + LT',l2:'hold',ms:1100},{ms:300}]}]},
  {name:'突破 → 转身 → 爆发',tag:'转身 Spin',
   why:'转身 = 右摇杆从持球手侧开始，经过下方画到另一侧（右手持球时是顺时针半圈，左手自动镜像为逆时针）。画得越快转得越快。防守人贴着你突破侧时用，转完立刻加速 + 左摇杆往新方向斜上冲。',
   phases:[
@@ -269,6 +284,37 @@ const COMBOS=[
   phases:[
    {txt:'按住 RT + 右摇杆 向上轻拨 = 分解组合',seq:[{t:1,rs:'U',ms:300,m:'轻拨'},{t:1,ms:600}]},
    {txt:'组合快结束时：按住 RT + 左摇杆 往防守人重心的反方向冲',seq:[{t:1,ls:'UO',ms:1200,lm:'推住冲'}]}]},
+ {name:'Lonzo 推进 连续换手',tag:'社区技巧 · 推进提速',
+  why:'来自 Operation Sports 的 2K26 教程：加速推进中，右摇杆往非持球手侧斜上拨换手；球一到另一只手，再往新的非持球手侧斜上拨换回来。两下都按住加速、左摇杆一直向前，是边跑边晃的提速推进。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前推进',seq:[{t:1,ls:'U',ms:800,lm:'推住'}]},
+   {txt:'左摇杆保持向前，按住 RT + 右摇杆 往非持球手侧斜上拨',seq:[{t:1,ls:'U',lm:'保持',rs:'UO',ms:260,m:'轻拨'},{t:1,ls:'U',lm:'保持',ms:220}]},
+   {flip:1,gap:700,txt:'球一到另一只手：再往（新的）非持球手侧斜上拨',seq:[{t:1,ls:'U',lm:'保持',rs:'UO',ms:260,m:'轻拨'},{t:1,ls:'U',lm:'保持',ms:220}]},
+   {flip:1,gap:500,txt:'按住 RT + 左摇杆 往持球手侧斜上冲出',seq:[{t:1,ls:'UB',ms:1100,lm:'推住冲'}]}]},
+ {name:'转身取消 → 原地发射',tag:'社区技巧 · Spin Cancel',
+  why:'来自 Operation Sports：转身画到一半，按住加速 + 左摇杆往下拨，会取消转身、原地完成一个半转身后直接发射。防守人以为你要转过去，往转身方向堵，你从原侧走。',
+  phases:[
+   {txt:'按住 RT + 左摇杆 向前突破',seq:[{t:1,ls:'U',ms:800,lm:'推住'}]},
+   {txt:'右摇杆 从持球手侧开始画圈（只画到下方）= 转身起手',seq:[{rs:'B',ms:130,m:'画圈起点'},{rs:'DB',ms:130,m:'画圈'},{rs:'D',ms:150,m:'画到这'},{ms:120}]},
+   {gap:450,txt:'转身中：按住 RT + 左摇杆 往下拨 = 取消转身',seq:[{t:1,ls:'D',ms:350,lm:'往下拨'},{t:1,ms:200}]},
+   {txt:'按住 RT + 左摇杆 往持球手侧斜上爆发',seq:[{t:1,ls:'UB',ms:1100,lm:'推住冲'}]}]},
+ {name:'穿裆 Nutmeg',tag:'社区技巧 · 细节待验证',
+  why:'来自 Operation Sports：贴近防守人时，右摇杆先往斜下、再迅速横拨，把球从防守人两腿之间穿过去。各站对具体斜下方向说法不一，这里按“非持球手侧斜下 → 非持球手侧横拨”演示，进游戏请先自己试两个方向。',
+  phases:[
+   {txt:'贴近防守人：右摇杆 往非持球手侧斜下，然后迅速滑到横向（一笔画完）',seq:[{rs:'DO',ms:200,m:'斜下'},{rs:'O',ms:200,m:'快速横拨'},{ms:150}]},
+   {gap:600,txt:'按住 RT + 左摇杆 向前冲去接球',seq:[{t:1,ls:'U',ms:1100,lm:'推住冲'}]}]},
+ {name:'按住加速 连续逃脱',tag:'社区技巧 · Chained Escapes',
+  why:'来自 Operation Sports：一直按住加速，右摇杆连续拨，就能把多个逃脱动作接起来。先往持球手侧拨 = 逃脱迟疑，再往非持球手侧斜上拨 = 逃脱交叉，最后爆发。手指全程不松 R2/RT。',
+  phases:[
+   {txt:'按住 RT + 右摇杆 往持球手侧轻拨 = 逃脱迟疑',seq:[{t:1,rs:'B',ms:260,m:'轻拨'},{t:1,ms:180}]},
+   {gap:600,txt:'不松 RT：右摇杆 往非持球手侧斜上拨 = 逃脱交叉（换手）',seq:[{t:1,rs:'UO',ms:260,m:'轻拨'},{t:1,ms:160}]},
+   {flip:1,gap:500,txt:'按住 RT + 左摇杆 往换手后的持球手侧斜上冲',seq:[{t:1,ls:'UB',ms:1100,lm:'推住冲'}]}]},
+ {name:'交叉 → 转身',tag:'社区技巧 · Crossover Spin',
+  why:'来自 Operation Sports：先往非持球手侧拨一个交叉换手，球到另一只手后立刻从新的持球手侧画半圈转身。防守人刚跟上交叉的方向，你又转回原来那侧。注意转身是在新的持球手上画，方向是镜像的。',
+  phases:[
+   {txt:'右摇杆 往非持球手侧轻拨 = 交叉换手',seq:F('O',260)},
+   {flip:1,gap:600,txt:'球已换手：右摇杆 从（新的）持球手侧 → 下 → 另一侧，画半圈 = 转身',seq:[{rs:'B',ms:120,m:'画圈起点'},{rs:'DB',ms:110,m:'画圈'},{rs:'D',ms:110,m:'画圈'},{rs:'DO',ms:110,m:'画圈'},{rs:'O',ms:160,m:'画到这松开'},{ms:140}]},
+   {flip:1,gap:500,txt:'转身后球回到原手：按住 RT + 左摇杆 往持球手侧斜上冲',seq:[{t:1,ls:'UB',ms:1100,lm:'推住冲'}]}]},
 ];
 
 // ====== 手柄 SVG ======
@@ -349,6 +395,7 @@ function render(){
   document.getElementById('bPlay').textContent=playing?'⏸ 暂停':'▶ 播放全部';
 }
 function loop(now){
+  if(mode==='practice'){ lastNow=now; practiceTick(now); requestAnimationFrame(loop); return; }
   const dt=(now-lastNow)*speed; lastNow=now;
   if(playing){
     if(loopWait>0){ loopWait-=dt; if(loopWait<=0){ tau=0; trails={ls:[],rs:[]}; } }
@@ -374,6 +421,7 @@ function selectCombo(i){
   document.getElementById('tl').innerHTML=c.phases.map((p,j)=>`<div style="flex:${phaseEnd[j]-phaseStart[j]}"><i></i></div>`).join('');
   document.querySelectorAll('#tl div').forEach((d,j)=>d.onclick=()=>playPhase(j));
   tau=0; trails={ls:[],rs:[]}; stopAt=null; loopWait=0; playing=true;
+  if(mode==='practice'){ playing=false; document.querySelectorAll('#steps li').forEach(li=>li.onclick=null); PS.stats={tries:0,ok:0,streak:0,best:0}; pReset(); setMsg('',''); }
 }
 
 document.getElementById('tabs').innerHTML=COMBOS.map((c,i)=>`<button>${i+1}. ${c.name}</button>`).join('');
@@ -392,6 +440,187 @@ function renderAll(){
   const p=playing,t=tau,s=stopAt; selectCombo(cur); playing=p; tau=t; stopAt=s;
 }
 bindSeg('segPad',v=>{pad=v;renderAll();}); bindSeg('segHand',v=>{hand=v;renderAll();}); bindSeg('segSpd',v=>speed=+v);
+
+// ====== 练习模式：用浏览器 Gamepad API 读真手柄，逐步判定 ======
+const SECT=['R','UR','U','UL','L','DL','D','DR'];
+const DIRANG={R:0,UR:45,U:90,UL:135,L:180,DL:225,D:270,DR:315};
+const DZ_ON=0.6, DZ_OFF=0.3, FLICK_MAX=450, HOLD_MIN=300;
+function sector(x,y){ const a=Math.atan2(-y,x)*180/Math.PI; return SECT[((Math.round(a/45)%8)+8)%8]; }
+function sdist(a,b){ const d=Math.abs(DIRANG[a]-DIRANG[b])%360; return Math.min(d,360-d)/45; }
+function readPad(){ const gs=navigator.getGamepads?navigator.getGamepads():[]; for(const g of gs) if(g&&g.connected) return g; return null; }
+function snap(g){ const b=i=>g.buttons[i]?g.buttons[i].value:0;
+  return {lx:g.axes[0]||0,ly:g.axes[1]||0,rx:g.axes[2]||0,ry:g.axes[3]||0,lt:b(6),rt:b(7)}; }
+const lsSect=s=>Math.hypot(s.lx,s.ly)>0.5?sector(s.lx,s.ly):null;
+
+// 从演示数据自动推出每一步要检查什么
+function specsFor(ph,flip){
+  const out=[]; let run=null;
+  const close=()=>{ if(!run) return; const d=run.dirs; let sp;
+    if(d.length>=3&&d.every(x=>x==='O'||x==='B')) sp={type:'rock'};
+    else if(d.length>=3) sp={type:'spin',dirs:d};
+    else if(d.length===2&&d[0]==='D'&&d[1]==='U'){ out.push({type:'hold',dir:'D',t:run.t,shot:1}); sp={type:'flick',dir:'U',maxMs:900,gap:600}; }
+    else if(d.length===2) sp={type:'path',dirs:d};
+    else sp={type:/按住/.test(run.m||'')?'hold':'flick',dir:d[0],ls:run.ls,l2:run.l2};
+    if(sp.t===undefined) sp.t=run.t; out.push(sp); run=null; };
+  for(const s of ph.seq){
+    if(s.rs){ if(!run) run={dirs:[],t:false,m:s.m,ls:s.ls||null,l2:null};
+      if(run.dirs[run.dirs.length-1]!==s.rs) run.dirs.push(s.rs);
+      if(s.t) run.t=true; if(s.l2) run.l2=s.l2; }
+    else close(); }
+  close();
+  if(!out.length){ const l=ph.seq.find(s=>s.l2), f=ph.seq.find(s=>s.ls);
+    if(l) out.push({type:'l2tap'}); else if(f) out.push({type:'ls',dir:f.ls,t:!!f.t}); }
+  out.forEach(o=>{o.flip=flip; if(ph.noT) o.noT=1;});
+  if(out[0]&&ph.gap) out[0].gap=ph.gap;
+  return out;
+}
+function flipsOf(c){ let f=false; return c.phases.map(p=>{ if(p.flip) f=!f; return f; }); }
+const A=(d,f)=>ARROW[scr(d,f)];
+function descSpec(sp){ if(!sp) return ''; const R=BTN[pad].RT, Lt=BTN[pad].LT, f=sp.flip;
+  const t=sp.t?` + 按住 ${R}`:sp.noT?`（不按 ${R}）`:'';
+  switch(sp.type){
+    case 'flick': return `右摇杆 ${A(sp.dir,f)} 轻拨回中${t}`+(sp.ls?`，左摇杆保持 ${A(sp.ls,f)}`:'');
+    case 'hold': return `右摇杆 ${A(sp.dir,f)} 按住不放${t}`+(sp.l2?` + 按住 ${Lt}`:'');
+    case 'rock': return `右摇杆 ${A('O',f)} ${A('B',f)} 左右来回摇（至少 3 下）`;
+    case 'spin': return `右摇杆 从 ${A(sp.dirs[0],f)} 开始画圈到 ${A(sp.dirs[sp.dirs.length-1],f)}${t}`;
+    case 'path': return `右摇杆 ${sp.dirs.map(d=>A(d,f)).join(' → ')} 一笔画完`;
+    case 'ls': return `左摇杆 ${A(sp.dir,f)} 推住${t}`;
+    case 'l2tap': return `轻按 ${Lt}`; } }
+
+let mode='demo';
+const PS={att:null,G:null,ls:null,l2was:0,cool:0,last:0,trails:{ls:[],rs:[]},stats:{tries:0,ok:0,streak:0,best:0},msg:'',msgCls:'',status:[],connId:null};
+function pReset(){ const c=COMBOS[cur]; PS.flips=flipsOf(c); PS.status=c.phases.map(()=>'');
+  PS.att={phase:0,si:0,specs:[],t0:0,lastEnd:0,rock:[],progressed:false}; PS.G=null; PS.ls=null; loadPhase(0); }
+function loadPhase(i){ const c=COMBOS[cur]; const a=PS.att;
+  while(i<c.phases.length){ a.phase=i; a.si=0; a.specs=specsFor(c.phases[i],PS.flips[i]); a.rock=[]; PS.ls=null;
+    if(a.specs.length) return; PS.status[i]='ok'; i++; }
+  a.phase=i; }
+const curSpec=()=>PS.att&&PS.att.specs[PS.att.si];
+function setMsg(m,cls){ PS.msg=m; PS.msgCls=cls||''; }
+function fail(m,now){ const a=PS.att;
+  if(a.progressed){ PS.stats.tries++; PS.stats.streak=0; }
+  PS.status[a.phase]='bad'; setMsg('❌ 第 '+(a.phase+1)+' 步：'+m,'bad'); PS.cool=now+1100; PS.G=null; }
+function done(now){ const a=PS.att; if(!a.progressed){ a.progressed=true; a.t0=now; }
+  a.si++; a.lastEnd=now;
+  if(a.si>=a.specs.length){ PS.status[a.phase]='ok'; loadPhase(a.phase+1);
+    if(a.phase>=COMBOS[cur].phases.length){ const s=PS.stats; s.tries++; s.ok++; s.streak++; s.best=Math.max(s.best,s.streak);
+      setMsg(`✅ 成功！总用时 ${Math.round(now-a.t0)} ms　连续成功 ${s.streak} 次`,'good'); PS.cool=now+1300; } }
+  else setMsg('',''); }
+function gapOk(sp,start,now){ const a=PS.att;
+  if(sp.gap&&a.progressed&&a.si===0&&start-a.lastEnd>sp.gap){ fail(`太慢了：和上一步间隔 ${Math.round(start-a.lastEnd)} ms，要在 ${sp.gap} ms 内接上`,now); return false; } return true; }
+
+function onGestureEnd(G,now){
+  const sp=curSpec(), f=sp&&sp.flip; if(!sp) return;
+  const dur=now-G.t0, main=G.main||G.peakDir;
+  if(sp.type==='ls'||sp.type==='l2tap') return fail(`这一步不用右摇杆，要：${descSpec(sp)}`,now);
+  if(sp.type==='rock'){
+    const oLeft=scr('O',f)==='L';
+    const sides=G.path.map(d=>{ if(d==='U'||d==='D') return null; const left=DIRANG[d]>90&&DIRANG[d]<270; return left===oLeft?'O':'B'; }).filter(Boolean);
+    if(!sides.length) return fail(`size-up 是左右摇（${A('O',f)} ${A('B',f)}），你拨的是 ${ARROW[main]}`,now);
+    for(const x of sides) if(PS.att.rock[PS.att.rock.length-1]!==x) PS.att.rock.push(x);
+    if(PS.att.rock.length>=3) done(now); else setMsg(`继续摇… 已经 ${PS.att.rock.length}/3 下`,'');
+    if(!PS.att.progressed){ PS.att.progressed=true; PS.att.t0=G.t0; } PS.att.lastEnd=now;
+    return; }
+  if(sp.type==='spin'){
+    const ex=sp.dirs.map(d=>scr(d,f)); let exAng=0;
+    for(let i=1;i<ex.length;i++){ let d=DIRANG[ex[i]]-DIRANG[ex[i-1]]; if(d>180)d-=360; if(d<-180)d+=360; exAng+=d; }
+    const got=G.ang*180/Math.PI;
+    if(sdist(G.path[0],ex[0])>1) return fail(`起点不对：要从 ${ARROW[ex[0]]} 开始画，你从 ${ARROW[G.path[0]]} 开始`,now);
+    if(Math.sign(got)!==Math.sign(exAng)) return fail(`画圈方向反了：要${exAng<0?'顺':'逆'}时针`,now);
+    if(Math.abs(got)<Math.abs(exAng)*0.6) return fail(`圈画得不够：画了 ${Math.round(Math.abs(got))}°，要约 ${Math.abs(exAng)}°`,now);
+    if(sp.t&&!G.rtAny) return fail(`转身时要按住 ${BTN[pad].RT}`,now);
+    if(!gapOk(sp,G.t0,now)) return; return done(now); }
+  if(sp.type==='path'){
+    const ex=sp.dirs.map(d=>scr(d,f)); let k=0; for(const d of G.path) if(d===ex[k]) k++;
+    if(k<ex.length) return fail(`轨迹不对：要 ${ex.map(d=>ARROW[d]).join('→')}，你画的是 ${G.path.map(d=>ARROW[d]).join('→')}`,now);
+    if(!gapOk(sp,G.t0,now)) return; return done(now); }
+  const ex=scr(sp.dir,f);
+  if(main!==ex) return fail(`方向错：你拨的是 ${ARROW[main]}，这一步要 ${ARROW[ex]}`,now);
+  if(sp.type==='hold'){ if(sp.l2&&G.ltMs<250) return fail(`欧洲步过程中要按住 ${BTN[pad].LT}`,now);
+    return fail(`要按住不放（至少 ${HOLD_MIN} ms），你只按了 ${Math.round(dur)} ms`,now); }
+  if(dur>(sp.maxMs||FLICK_MAX)) return fail(`拨太久了（${Math.round(dur)} ms）变成按住，轻拨要马上松手回中`,now);
+  if(sp.t&&!G.rtAtMain) return fail(`这一下要同时按住 ${BTN[pad].RT}`,now);
+  if(sp.noT&&G.rtAny) return fail(`这一下不能按 ${BTN[pad].RT}（按了就变成另一个招）`,now);
+  if(sp.ls){ const le=scr(sp.ls,f); if(!G.lsAtMain||sdist(G.lsAtMain,le)>1) return fail(`左摇杆要同时保持 ${ARROW[le]}`,now); }
+  if(!gapOk(sp,G.t0,now)) return; done(now);
+}
+function checkHold(G,now){ const sp=curSpec(); if(!sp||sp.type!=='hold') return;
+  const ex=scr(sp.dir,sp.flip), main=G.main||G.peakDir;
+  if(main===ex&&now-G.t0>=HOLD_MIN&&(!sp.l2||G.ltMs>=250)&&(!sp.t||G.rtAny)){ if(!gapOk(sp,G.t0,now)) return; G.done=true; done(now); } }
+
+function practiceTick(now){
+  const dt=PS.last?Math.min(50,now-PS.last):16; PS.last=now;
+  const g=readPad(); padStatus(g);
+  const s=g?snap(g):{lx:0,ly:0,rx:0,ry:0,lt:0,rt:0};
+  if(g&&now>=PS.cool){
+    if(PS.cool&&(PS.att.phase>=COMBOS[cur].phases.length||PS.status.includes('bad'))){ pReset(); PS.cool=0; if(PS.msgCls==='bad') setMsg(PS.msg.replace('❌','↻ 重来 ·'),'bad'); }
+    const rm=Math.hypot(s.rx,s.ry);
+    if(!PS.G&&rm>DZ_ON) PS.G={t0:now,path:[],peak:0,peakDir:null,main:null,ang:0,lastA:null,rtAny:false,rtAtMain:false,lsAtMain:null,ltMs:0,done:false};
+    const G=PS.G;
+    if(G){
+      if(rm>DZ_ON){ const sec=sector(s.rx,s.ry); if(G.path[G.path.length-1]!==sec) G.path.push(sec);
+        const a=Math.atan2(-s.ry,s.rx); if(G.lastA!==null){ let d=a-G.lastA; if(d>Math.PI)d-=2*Math.PI; if(d<-Math.PI)d+=2*Math.PI; G.ang+=d; } G.lastA=a;
+        if(!G.main&&rm>0.85){ G.main=sec; G.rtAtMain=s.rt>0.5; G.lsAtMain=lsSect(s); } }
+      if(rm>G.peak){ G.peak=rm; G.peakDir=sector(s.rx,s.ry); if(!G.main){ G.rtAtMain=s.rt>0.5; G.lsAtMain=lsSect(s);} }
+      if(s.rt>0.5) G.rtAny=true; if(s.lt>0.5) G.ltMs+=dt;
+      if(!G.done) checkHold(G,now);
+      if(rm<DZ_OFF){ if(!G.done) onGestureEnd(G,now); PS.G=null; }
+    }
+    const sp=curSpec();
+    if(sp&&sp.type==='ls'&&now>=PS.cool){
+      if(!PS.ls) PS.ls={ok:0,wrong:0,noRt:0,start:null};
+      const L=PS.ls, ls=lsSect(s), ex=scr(sp.dir,sp.flip);
+      if(ls===ex){ L.wrong=0; if(L.start===null) L.start=now;
+        if(sp.t&&s.rt<0.5){ L.noRt+=dt; if(L.noRt>350) fail(`左摇杆方向对了，但要同时按住 ${BTN[pad].RT}`,now); }
+        else { L.ok+=dt; if(L.ok>=150&&gapOk(sp,L.start,now)) done(now); } }
+      else if(ls){ L.wrong+=dt; if(L.wrong>600) fail(`左摇杆方向错：你推的是 ${ARROW[ls]}，要 ${ARROW[ex]}`,now); }
+    }
+    if(sp&&sp.type==='l2tap'&&s.lt>0.5&&PS.l2was<=0.5&&now>=PS.cool) done(now);
+    PS.l2was=s.lt;
+    const a=PS.att; if(a.progressed&&!PS.G&&now-a.lastEnd>3000&&now>=PS.cool&&a.phase<COMBOS[cur].phases.length){ pReset(); setMsg('⏱ 超过 3 秒没接下一步，重新开始',''); }
+  }
+  drawLive(s,now,!!g);
+}
+
+function drawLive(s,now,has){
+  const L=LAYOUT[pad], a=PS.att, n=COMBOS[cur].phases.length, P=Math.min(a.phase,n-1), sp=curSpec();
+  for(const st of ['ls','rs']){
+    const c=st==='ls'?L.LS:L.RS, x=c[0]+(st==='ls'?s.lx:s.rx)*TRAVEL, y=c[1]+(st==='ls'?s.ly:s.ry)*TRAVEL;
+    ['Cap','Dot'].forEach(k=>{const e=document.getElementById(st+k); e.setAttribute('cx',x); e.setAttribute('cy',y);});
+    const tr=PS.trails[st]; tr.push([x,y,now]); while(tr.length&&now-tr[0][2]>500) tr.shift();
+    document.getElementById(st+'Trail').setAttribute('points',tr.map(p=>p[0]+','+p[1]).join(' '));
+    const m=st==='ls'?Math.hypot(s.lx,s.ly):Math.hypot(s.rx,s.ry);
+    document.getElementById(st+'Act').textContent=m>0.5?ARROW[sector(st==='ls'?s.lx:s.rx,st==='ls'?s.ly:s.ry)]:'';
+    // 虚线 = 这一步期望的方向
+    const gd=sp&&(st==='rs'?(['flick','hold'].includes(sp.type)?sp.dir:sp.dirs?sp.dirs[0]:sp.type==='rock'?'O':null):(sp.type==='ls'?sp.dir:sp.ls||null));
+    const gh=document.getElementById(st+'Ghost');
+    if(gd){ const v=VEC[scr(gd,sp.flip)]; gh.setAttribute('x2',c[0]+v[0]*(GATE+4)); gh.setAttribute('y2',c[1]+v[1]*(GATE+4)); gh.setAttribute('opacity',.9);} else gh.setAttribute('opacity',0);
+  }
+  const tR=document.getElementById('trR'),tL=document.getElementById('trL');
+  tR.setAttribute('fill',s.rt>0.5?'#ff3b5c':'#262b35'); tR.setAttribute('transform',`translate(0,${s.rt*6})`);
+  tL.setAttribute('fill',s.lt>0.5?'#38d39f':'#262b35'); tL.setAttribute('transform',`translate(0,${s.lt*6})`);
+  document.getElementById('trRAct').textContent=s.rt>0.5?'按住':''; document.getElementById('trLAct').textContent=s.lt>0.5?'按住':'';
+  document.getElementById('ballHand').textContent='🏀 球在'+(((hand==='R')!==!!PS.flips[P])?'右手':'左手');
+  document.getElementById('capN').textContent=a.phase>=n?'完成':`第 ${P+1} / ${n} 步`;
+  document.getElementById('capT').innerHTML=has?(sp?'现在要：'+fmt(descSpec(sp)):'✅'):'先连接手柄';
+  document.querySelectorAll('#steps li').forEach((li,i)=>{ li.classList.toggle('now',i===a.phase&&PS.status[i]!=='bad'); li.classList.toggle('ok',PS.status[i]==='ok'); li.classList.toggle('bad',PS.status[i]==='bad'); });
+  const pm=document.getElementById('pMsg'); pm.textContent=PS.msg; pm.className='pmsg '+PS.msgCls;
+  const st=PS.stats; document.getElementById('pStats').textContent=`尝试 ${st.tries}　成功 ${st.ok}　成功率 ${st.tries?Math.round(st.ok/st.tries*100):0}%　连续 ${st.streak}　最佳连续 ${st.best}`;
+}
+function padStatus(g){ const el=document.getElementById('pPad'); const id=g?g.id:null;
+  if(id===PS.connId) return; PS.connId=id;
+  if(!g){ el.innerHTML='🔌 <b>未检测到手柄</b>：用 USB 或蓝牙把 PS5 / Xbox 手柄连到电脑，然后<b>随便按一个键</b>（浏览器要先按键才会识别）。推荐 Chrome / Edge。'; el.className='ppad off'; return; }
+  el.innerHTML='🎮 已连接：'+id.replace(/</g,'')+(g.mapping!=='standard'?'　<span style="color:#ff3b5c">（非标准映射，摇杆/扳机可能对不上）</span>':''); el.className='ppad on';
+  const isX=/xbox|xinput|045e/i.test(id), isP=/dualsense|dualshock|wireless controller|054c/i.test(id);
+  const want=isX?'xb':isP?'ps':null; if(want&&want!==pad) document.querySelector(`#segPad button[data-v="${want}"]`).click(); }
+function setMode(m){ mode=m; const pr=m==='practice';
+  document.getElementById('prac').style.display=pr?'':'none';
+  ['tl','btnsDemo','segSpd'].forEach(id=>document.getElementById(id).style.display=pr?'none':'');
+  PS.trails={ls:[],rs:[]}; PS.connId=undefined;
+  if(pr){ playing=false; pReset(); setMsg('',''); } else selectCombo(cur); }
+window.addEventListener('gamepadconnected',()=>{PS.connId=undefined;});
+
+bindSeg('segMode',setMode);
 renderAll(); selectCombo(0);
 lastNow=performance.now(); requestAnimationFrame(loop);
 </script>
